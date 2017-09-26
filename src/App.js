@@ -9,11 +9,9 @@ class App extends Component {
     if(props.params !== undefined){
       this.usuario = props.params.match.usuario;
     }
-    console.log(`propriedades do App ${props}`);
   }
 
   componentWillReceiveProps(nextProps ){
-    console.log(`componentWillReceiveProps(${nextProps} )`);
     if(nextProps.match.params.usuario !== undefined){
         this.usuario = nextProps.match.params.usuario ;
        

@@ -1,11 +1,43 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 class FotoAtualizacoes extends Component {
+
+  constructor(props){
+    super(props);
+    this.state = {likeada : this.props.foto.likeada};
+  }
+  like(event) {
+    event.preventDefault();
+
+    const requestInfo = {
+      method:'POST',
+      body:JSON.stringify({}),
+      headers: new Headers({
+          'Content-type':'application/json'
+      })
+  };
+
+    fetch(`http://localhost:8080/api/fotos/${this.props.foto.id}/like?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`, requestInfo)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("não foi possível realizar o like da foto");
+        }
+      }).then(like => {
+        this.setState({ likeada: !this.state.likeada })
+      }).catch(error => {
+        console.log(`Erro no like ${error}`);
+        
+      })
+
+  }
+
   render() {
     return (
       <section className="fotoAtualizacoes">
-        <a href="href" className="fotoAtualizacoes-like">Likar</a>
-        <form className="fotoAtualizacoes-form">
+        <a onClick={this.like.bind(this)} className={this.state.likeada ? 'fotoAtualizacoes-like-ativo' : 'fotoAtualizacoes-like'} > Linkar</a>
+      <form className="fotoAtualizacoes-form">
           <input type="text" placeholder="Adicione um comentário..." className="fotoAtualizacoes-form-campo" />
           <input type="submit" value="Comentar!" className="fotoAtualizacoes-form-submit" />
         </form>
@@ -20,8 +52,8 @@ class FotoInfo extends Component {
       <div className="foto-in fo">
         <div className="foto-info-likes">
           {this.props.foto.likers.map(infoLike => {
-            return (
-              <Link to={`/timeline/${infoLike.id}`}>
+            return(
+              <Link key={`${infoLike.id} + ${infoLike.nome}`} to={`/timeline/${infoLike.id}`}>
                 {infoLike.nome}
               </Link>
             )
@@ -29,14 +61,14 @@ class FotoInfo extends Component {
           {this.textoCurtir(this.props.foto.likers.length)}
         </div>
         <p className="foto-info-legenda">
-          tu<Link to={`/timeline/${this.props.foto.loginUsuario}`}className="foto-info-autor">{this.props.foto.loginUsuario} </Link>
+          <Link to={`/timeline/${this.props.foto.loginUsuario}`} className="foto-info-autor">{this.props.foto.loginUsuario} </Link>
           {this.props.foto.comentario}
         </p>
         <ul className="foto-info-comentarios">
           {this.props.foto.comentarios.map(comentario => {
             return (
               <li className="comentario">
-                <Link to={`/timeline/${comentario.login}`} className="foto-info-autor">{comentario.login}</Link>
+                <Link key={comentario.text} to={`/timeline/${comentario.login}`} className="foto-info-autor">{comentario.login}</Link>
                 {comentario.texto}
               </li>
             )
@@ -86,8 +118,8 @@ export default class FotoItem extends Component {
       <div className="foto">
         <FotoHeader foto={this.props.foto} />
         <img alt="foto" className="foto-src" src={this.props.foto.urlFoto} />
-        <FotoInfo foto={this.props.foto} />
-        <FotoAtualizacoes />
+        <FotoInfo foto={this.props.foto} key={this.props.foto.id} />
+        <FotoAtualizacoes foto={this.props.foto} />
       </div>
     );
   }

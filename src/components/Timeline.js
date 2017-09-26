@@ -18,7 +18,6 @@ export default class Timeline extends Component {
         }
         fetch(urlPerfil).then(response =>
             response.json().then(fotos => { 
-                console.log(fotos);
                 this.setState({ fotos: fotos 
                 }); }
             )).catch(error => console.log(error));
