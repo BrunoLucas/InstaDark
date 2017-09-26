@@ -12,6 +12,7 @@ import {
 } from 'react-router-dom';
 
 function verificaSeNaoEstaAutenticado(nextState, replace) {
+    console.log(`verifica se esta autorizado ${nextState} ${replace}`);
     if (localStorage.getItem('auth-token') == null) {
         return true;
     }
@@ -44,6 +45,21 @@ ReactDOM.render(
                             <App />
                         )
                 )} />
+
+        
+        
+        
+                <Route exact path="/timeline/:usuario" render={(props) => {
+                console.log('aqui estou ' + props);    
+                return (
+                    verificaSeNaoEstaAutenticado() ? (
+                        <Redirect to="/login" mensagemErroLogin="você precisa estar logado para acessar o endereço" />
+                    ) : (
+                            <App {...props}/>
+                        )
+                )
+                }
+            } />
                 <Route exact path="/logout" render={() => (
                     removeToken() ? (
                         <Redirect to="/login" />

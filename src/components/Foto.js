@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import { Link } from 'react-router-dom';
 class FotoAtualizacoes extends Component {
   render() {
     return (
@@ -21,22 +21,22 @@ class FotoInfo extends Component {
         <div className="foto-info-likes">
           {this.props.foto.likers.map(infoLike => {
             return (
-              <a href="href">
+              <Link to={`/timeline/${infoLike.id}`}>
                 {infoLike.nome}
-              </a>
+              </Link>
             )
           })}
           {this.textoCurtir(this.props.foto.likers.length)}
         </div>
         <p className="foto-info-legenda">
-          <a className="foto-info-autor">autor </a>
+          tu<Link to={`/timeline/${this.props.foto.loginUsuario}`}className="foto-info-autor">{this.props.foto.loginUsuario} </Link>
           {this.props.foto.comentario}
         </p>
         <ul className="foto-info-comentarios">
           {this.props.foto.comentarios.map(comentario => {
             return (
               <li className="comentario">
-                <a className="foto-info-autor">{comentario.login}</a>
+                <Link to={`/timeline/${comentario.login}`} className="foto-info-autor">{comentario.login}</Link>
                 {comentario.texto}
               </li>
             )
@@ -46,25 +46,26 @@ class FotoInfo extends Component {
     );
   }
 
-  textoCurtir(quantidadeLikes){
-    if(quantidadeLikes === 1){
+  textoCurtir(quantidadeLikes) {
+    if (quantidadeLikes === 1) {
       return <p>curtiu</p>
-    }else if(quantidadeLikes > 1){
+    } else if (quantidadeLikes > 1) {
       return <p>curtiram</p>
     }
   }
 }
 
 class FotoHeader extends Component {
+
   render() {
     return (
       <header className="foto-header">
         <figure className="foto-usuario">
           <img src={this.props.foto.urlPerfil} alt="foto do usuario" />
           <figcaption className="foto-usuario">
-            <a href="href">
+            <Link to={`/timeline/${this.props.foto.loginUsuario}`}>
               {this.props.foto.loginUsuario}
-            </a>
+            </Link>
           </figcaption>
         </figure>
         <time className="foto-data">{this.props.foto.horario}</time>
@@ -78,8 +79,8 @@ export default class FotoItem extends Component {
   constructor() {
     super();
     this.state = {};
-
   }
+
   render() {
     return (
       <div className="foto">
