@@ -4,20 +4,20 @@ import PubSub from 'pubsub-js';
 
 class FotoAtualizacoes extends Component {
 
-  constructor(props){
+  constructor(props) {
     super(props);
-    this.state = {likeada : this.props.foto.likeada};
+    this.state = { likeada: this.props.foto.likeada };
   }
   like(event) {
     event.preventDefault();
 
     const requestInfo = {
-      method:'POST',
-      body:JSON.stringify({}),
+      method: 'POST',
+      body: JSON.stringify({}),
       headers: new Headers({
-          'Content-type':'application/json'
+        'Content-type': 'application/json'
       })
-  };
+    };
 
     fetch(`http://localhost:8080/api/fotos/${this.props.foto.id}/like?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`, requestInfo)
       .then(response => {
@@ -27,10 +27,11 @@ class FotoAtualizacoes extends Component {
           throw new Error("não foi possível realizar o like da foto");
         }
       }).then(like => {
-        this.setState({ likeada: !this.state.likeada })
+        this.setState({ likeada: !this.state.likeada });
+        PubSub.publish("atualiza-liker", { fotoId: this.props.foto.id, like });
       }).catch(error => {
         console.log(`Erro no like ${error}`);
-        
+
       })
 
   }
@@ -39,7 +40,7 @@ class FotoAtualizacoes extends Component {
     return (
       <section className="fotoAtualizacoes">
         <a onClick={this.like.bind(this)} className={this.state.likeada ? 'fotoAtualizacoes-like-ativo' : 'fotoAtualizacoes-like'} > Linkar</a>
-      <form className="fotoAtualizacoes-form">
+        <form className="fotoAtualizacoes-form">
           <input type="text" placeholder="Adicione um comentário..." className="fotoAtualizacoes-form-campo" />
           <input type="submit" value="Comentar!" className="fotoAtualizacoes-form-submit" />
         </form>
@@ -54,7 +55,7 @@ class FotoInfo extends Component {
       <div className="foto-in fo">
         <div className="foto-info-likes">
           {this.props.foto.likers.map(infoLike => {
-            return(
+            return (
               <Link key={`${infoLike.id} + ${infoLike.nome}`} to={`/timeline/${infoLike.id}`}>
                 {infoLike.nome}
               </Link>
@@ -113,6 +114,12 @@ export default class FotoItem extends Component {
   constructor() {
     super();
     this.state = {};
+  }
+
+  componentWillMount() {
+    PubSub.subscribe('atualiza-liker', (topico, infoLiker) => {
+      console.log(infoLiker);
+    });
   }
 
   render() {
