@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import PubSub from 'pubsub-js';
+
 class FotoAtualizacoes extends Component {
 
   constructor(props){
