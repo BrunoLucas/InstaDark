@@ -26,9 +26,9 @@ class FotoAtualizacoes extends Component {
         } else {
           throw new Error("não foi possível realizar o like da foto");
         }
-      }).then(like => {
+      }).then(liker => {
         this.setState({ likeada: !this.state.likeada });
-        PubSub.publish("atualiza-liker", { fotoId: this.props.foto.id, like });
+        PubSub.publish("atualiza-liker", { fotoId: this.props.foto.id, liker: liker });
       }).catch(error => {
         console.log(`Erro no like ${error}`);
 
@@ -50,18 +50,60 @@ class FotoAtualizacoes extends Component {
 }
 
 class FotoInfo extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = { likers: this.props.foto.likers, mensagemCurtiu: '' };
+    this.atualizaMensagemCurtiu(this.props.foto.likers);
+  }
+
+  componentWillMount() {
+    PubSub.subscribe('atualiza-liker', (topico, infoLiker) => {
+      if (this.props.foto.id === infoLiker.fotoId) {
+        let possivelLike = this.state.likers.find(liker => liker.login === infoLiker.liker.login);
+        if (possivelLike === undefined) {
+          let novosLikers = this.state.likers.concat(infoLiker.liker);
+          this.setState({ likers: novosLikers });
+        } else {
+          let novaListaDeLikers = this.state.likers.filter(liker => {
+            return liker.login !== infoLiker.liker.login
+          });
+          this.setState({ likers: novaListaDeLikers });
+        }
+        this.atualizaMensagemCurtiu(this.state.likers);
+      }
+    });
+  }
+
+  atualizaMensagemCurtiu(listaLikers) {
+    if (listaLikers.length === 1) {
+      this.setState({ mensagemCurtiu: 'curtiu' });
+    } else if (listaLikers.length > 1) {
+      this.setState({ mensagemCurtiu: 'curtiram' });
+    } else {
+      this.setState({ mensagemCurtiu: '' });
+    }
+  }
+
+
+
+
   render() {
     return (
       <div className="foto-in fo">
         <div className="foto-info-likes">
-          {this.props.foto.likers.map(infoLike => {
-            return (
-              <Link key={`${infoLike.id} + ${infoLike.nome}`} to={`/timeline/${infoLike.id}`}>
-                {infoLike.nome}
-              </Link>
-            )
+          {this.state.likers.map(liker => {
+            if (this.state.likers.length === 1) {
+              return (
+                <Link key={liker.login} to={`/timeline/${liker.login}`}>
+                  {liker.login}
+                </Link>
+              )
+            } else {
+              return (<Link key={liker.login} to={`/timeline/${liker.login}`}>{liker.login},</Link>)
+            }
           })}
-          {this.textoCurtir(this.props.foto.likers.length)}
+          <label>{this.state.mensagemCurtiu}</label>
         </div>
         <p className="foto-info-legenda">
           <Link to={`/timeline/${this.props.foto.loginUsuario}`} className="foto-info-autor">{this.props.foto.loginUsuario} </Link>
@@ -83,9 +125,9 @@ class FotoInfo extends Component {
 
   textoCurtir(quantidadeLikes) {
     if (quantidadeLikes === 1) {
-      return <p>curtiu</p>
+      return <label>curtiu</label>
     } else if (quantidadeLikes > 1) {
-      return <p>curtiram</p>
+      return <label>curtiram</label>
     }
   }
 }
@@ -114,12 +156,6 @@ export default class FotoItem extends Component {
   constructor() {
     super();
     this.state = {};
-  }
-
-  componentWillMount() {
-    PubSub.subscribe('atualiza-liker', (topico, infoLiker) => {
-      console.log(infoLiker);
-    });
   }
 
   render() {
