@@ -12,7 +12,6 @@ import {
 } from 'react-router-dom';
 
 function verificaSeNaoEstaAutenticado(nextState, replace) {
-    console.log(`verifica se esta autorizado ${nextState} ${replace}`);
     if (localStorage.getItem('auth-token') == null) {
         return true;
     }
